@@ -9,6 +9,13 @@ public class Message {
     private String mid;
     private String text;
 
+    public Message() {
+    }
+
+    public Message(String text) {
+        this.text = text;
+    }
+
     public String getSeq() {
         return seq;
     }

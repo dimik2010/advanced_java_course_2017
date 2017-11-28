@@ -3,7 +3,6 @@ package edu.technopolis.advanced.boatswain;
 import java.io.BufferedReader;
 import java.io.Closeable;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
@@ -23,8 +22,8 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import edu.technopolis.advanced.boatswain.request.Request;
 
-class OkApiClient implements Closeable {
-    private static final Logger log = LoggerFactory.getLogger(OkApiClient.class);
+class ApiClient implements Closeable {
+    private static final Logger log = LoggerFactory.getLogger(ApiClient.class);
     private static final ObjectMapper MAPPER = new ObjectMapper();
 
     private final String apiSchema;
@@ -32,7 +31,7 @@ class OkApiClient implements Closeable {
     private final String tokenParam;
     private final CloseableHttpClient client;
 
-    OkApiClient(String apiSchema, String apiHost, String tokenParam) {
+    ApiClient(String apiSchema, String apiHost, String tokenParam) {
         this.apiSchema = apiSchema;
         this.apiHost = apiHost;
         this.tokenParam = tokenParam;
@@ -56,7 +55,7 @@ class OkApiClient implements Closeable {
 
     <REQ extends Request, RESP> RESP post(REQ req, Class<RESP> clazz) throws IOException {
         String queryString = getQueryString(req);
-        log.info("POSTing to [{}] wih following data [{}]", queryString, req.getPayload());
+        log.info("Sending POST to [{}] wih following data [{}]", queryString, req.getPayload());
         HttpPost post = new HttpPost(queryString);
         post.setEntity(new ByteArrayEntity(MAPPER.writeValueAsBytes(req.getPayload()), ContentType.APPLICATION_JSON));
         return method(clazz, post);
@@ -74,21 +73,19 @@ class OkApiClient implements Closeable {
             String content = sb.toString();
             log.info("Read response {}", content);
             return MAPPER.readValue(content, clazz);
-//            }
-            //            try (InputStream content = response.getEntity().getContent()) {
-//                return MAPPER.readValue(content, clazz);
-//            }
         }
     }
 
     private <REQ extends Request> String getQueryString(REQ req) {
         String queryString = req.getQueryStart();
-        if (queryString.indexOf('?') != -1) {
-            //... то нужно добавит ещё один параметр
-            queryString += '&' + tokenParam;
-        } else {
-            //... иначе добавить новый единственный параметр
-            queryString += '?' + tokenParam;
+        if (tokenParam != null) {
+            if (queryString.indexOf('?') != -1) {
+                //... то нужно добавит ещё один параметр
+                queryString += '&' + tokenParam;
+            } else {
+                //... иначе добавить новый единственный параметр
+                queryString += '?' + tokenParam;
+            }
         }
         return apiSchema + "://" + apiHost + queryString;
     }

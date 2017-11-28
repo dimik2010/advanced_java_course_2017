@@ -56,8 +56,9 @@ class BotServer {
     }
 
 
-    void start() {
+    BotServer start() {
         httpServer.start();
+        return this;
     }
 
     void stop() {

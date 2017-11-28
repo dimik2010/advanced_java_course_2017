@@ -9,7 +9,6 @@ import org.slf4j.LoggerFactory;
 
 import edu.technopolis.advanced.boatswain.incoming.request.Message;
 import edu.technopolis.advanced.boatswain.incoming.request.MessageNotification;
-import edu.technopolis.advanced.boatswain.incoming.request.Recipient;
 import edu.technopolis.advanced.boatswain.request.GetSubscriptionsRequest;
 import edu.technopolis.advanced.boatswain.request.SendMessagePayload;
 import edu.technopolis.advanced.boatswain.request.SendMessageRequest;
@@ -36,10 +35,9 @@ public class BoatswainBot {
             log.error("Failed to read application properties. Terminating application...");
             System.exit(1);
         }
-        OkApiClient client = null;
+        ApiClient okClient = createClient(props);
         try {
-            client = createClient(props);
-            GetSubscriptionsResponse response = client.get(
+            GetSubscriptionsResponse response = okClient.get(
                     new GetSubscriptionsRequest(props.getProperty("ok.api.endpoint.subscriptions")), GetSubscriptionsResponse.class);
             String botEndpoint = props.getProperty("bot.message.endpoint");
             log.info("Checking that bot is subscribed to messages...");
@@ -47,20 +45,30 @@ public class BoatswainBot {
                 log.info("Subscription exists");
             } else {
                 log.info("Subscription does not exist. Making a subscription...");
-                subscribe(client, props, botEndpoint);
+                subscribe(okClient, props, botEndpoint);
                 log.info("Subscription is ok");
             }
             log.info("Creating endpoint...");
-            createServer(client, props);
+            BotServer server = createServer(okClient, props);
             log.info("Server created. Waiting for incoming connections...");
+            addShutDownHooks(server, okClient);
         } catch (Exception e) {
-            log.error("Failed to create api client", e);
-            closeClient(client);
+            log.error("Unexpected failure", e);
+            closeClient(okClient);
             System.exit(1);
         }
     }
 
-    private static void closeClient(OkApiClient client) {
+    private static void addShutDownHooks(BotServer server, ApiClient okClient) {
+        Runtime
+                .getRuntime()
+                .addShutdownHook(new Thread(() -> {
+                    closeClient(okClient);
+                    server.stop();
+                }));
+    }
+
+    private static void closeClient(ApiClient client) {
         if (client != null) {
             try {
                 client.close();
@@ -70,9 +78,9 @@ public class BoatswainBot {
         }
     }
 
-    private static void subscribe(OkApiClient client, Properties props, String botEndpoint) throws IOException {
+    private static void subscribe(ApiClient client, Properties props, String botEndpoint) throws IOException {
         SubscribeRequest req = new SubscribeRequest(props.getProperty("ok.api.endpoint.subscribe"),
-                new SubscribePayload(botEndpoint));
+                new SubscribePayload(botEndpoint, props.getProperty("bot.phrase")));
         SubscribeResponse post = client.post(req, SubscribeResponse.class);
         if (!post.isSuccess()) {
             throw new IllegalStateException("Failed to subscribe bot to messages");
@@ -92,43 +100,38 @@ public class BoatswainBot {
         return false;
     }
 
-    private static OkApiClient createClient(Properties props) throws IOException {
+    private static ApiClient createClient(Properties props) {
         String schema = props.getProperty("ok.api.schema", "https");
         String host = props.getProperty("ok.api.host");
         String tokenParamName = props.getProperty("ok.api.param.token");
         String token = props.getProperty("ok.api.access_token");
-        return new OkApiClient(schema, host, tokenParamName + '=' + token);
+        return new ApiClient(schema, host, tokenParamName + '=' + token);
     }
 
-    private static void createServer(OkApiClient client, Properties props) {
+    private static BotServer createServer(ApiClient okClient, Properties props) throws IOException {
         try {
-            BotServer botServer = new BotServer(props.getProperty("bot.message.local.endpoint"),
-                    new MessageSender(client, props)::send);
-            Runtime
-                    .getRuntime()
-                    .addShutdownHook(new Thread(() -> {
-                        closeClient(client);
-                        botServer.stop();
-                    }));
-            botServer.start();
+            return new BotServer(
+                    props.getProperty("bot.message.local.endpoint"),
+                    new MessageSender(okClient, props)::send
+            ).start();
         } catch (IOException e) {
-            log.error("Failed to initialize http server on port 80", e);
+            log.error("Failed to initialize http server on port 80");
+            throw e;
         }
     }
 
     private static class MessageSender {
 
-        private final OkApiClient client;
+        private final ApiClient client;
         private final String phrase;
         private final String joke;
         private final String sendEndpoint;
 
-        MessageSender(OkApiClient client, Properties props) {
-            this.client = client;
+        MessageSender(ApiClient okClient, Properties props) {
+            this.client = okClient;
             this.phrase = props.getProperty("bot.phrase");
             this.joke = props.getProperty("bot.joke");
             this.sendEndpoint = props.getProperty("ok.api.endpoint.send");
-            log.info("Phrase is {}, joke is {}", phrase, joke);
         }
 
         boolean send(MessageNotification notif) {
@@ -136,7 +139,7 @@ public class BoatswainBot {
                 log.info("Message notification contains no text <{}>", notif);
                 return true;
             }
-            if (!notif.getMessage().getText().contains(phrase)) {
+            if (!notif.getMessage().getText().startsWith(phrase)) {
                 log.info("Message notification does not contain phrase <{}>", notif);
                 return true;
             }
@@ -144,15 +147,17 @@ public class BoatswainBot {
                 log.warn("Message notification does not contain chat id <{}>", notif);
                 return false;
             }
-            SendRecipient recipient = new SendRecipient(notif.getSender().getUserId());
-            Message message = new Message();
-            message.setText(joke);
             SendMessageRequest req = new SendMessageRequest(sendEndpoint, notif.getRecipient().getChatId())
-                    .setPayload(new SendMessagePayload(recipient, message));
+                    .setPayload(
+                            new SendMessagePayload(
+                                    new SendRecipient(notif.getSender().getUserId()),
+                                    new Message(joke)
+                            )
+                    );
             try {
                 return client.post(req, SendMessageResponse.class).getMessageId() != null;
             } catch (IOException e) {
-                log.error("Failed to send message ", e);
+                log.error("Failed to send message", e);
                 return false;
             }
         }

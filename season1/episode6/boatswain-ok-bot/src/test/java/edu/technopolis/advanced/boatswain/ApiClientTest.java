@@ -3,28 +3,29 @@ package edu.technopolis.advanced.boatswain;
 import java.io.IOException;
 
 import org.junit.AfterClass;
+import org.junit.Assert;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
 import edu.technopolis.advanced.boatswain.incoming.request.Message;
-import edu.technopolis.advanced.boatswain.incoming.request.Recipient;
 import edu.technopolis.advanced.boatswain.request.GetSubscriptionsRequest;
 import edu.technopolis.advanced.boatswain.request.SendMessagePayload;
 import edu.technopolis.advanced.boatswain.request.SendMessageRequest;
 import edu.technopolis.advanced.boatswain.request.SendRecipient;
 import edu.technopolis.advanced.boatswain.request.SubscribePayload;
 import edu.technopolis.advanced.boatswain.request.SubscribeRequest;
+import edu.technopolis.advanced.boatswain.response.CurrencyResponse;
 import edu.technopolis.advanced.boatswain.response.GetSubscriptionsResponse;
 import edu.technopolis.advanced.boatswain.response.SendMessageResponse;
 import edu.technopolis.advanced.boatswain.response.SubscribeResponse;
 import junit.framework.TestCase;
 
-public class OkApiClientTest {
-    private static OkApiClient client;
+public class ApiClientTest {
+    private static ApiClient client;
 
     @BeforeClass
     public static void createClient() throws IOException {
-        client = new OkApiClient("https", "api.ok.ru",
+        client = new ApiClient("https", "api.ok.ru",
                 "access_token=tkn1QkblURYK61ihvr5c9Q7YnpfWbu6htbhjP9QmkeuT9hcwrrvjIhousxsjNVK11WRUq1:CBAJEOPLEBABABABA");
     }
 
@@ -54,6 +55,14 @@ public class OkApiClientTest {
         req.setPayload(payload);
         SendMessageResponse status = client.post(req, SendMessageResponse.class);
         TestCase.assertNotNull(status);
+    }
+
+    @Test
+    public void testCurrency() throws IOException {
+        ApiClient currencyClient = new ApiClient("http", "api.fixer.io", null);
+        CurrencyResponse usd = currencyClient.get(new CurrencyRequest("USD"), CurrencyResponse.class);
+        Assert.assertNotNull(usd.getRates());
+        Assert.assertNotNull(usd.getRates().get("RUB"));
     }
 
     @AfterClass
