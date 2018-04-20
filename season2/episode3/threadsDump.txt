@@ -1,0 +1,153 @@
+2018-04-20 14:47:57
+Full thread dump Java HotSpot(TM) 64-Bit Server VM (9.0.4+11 mixed mode):
+
+"Thread-1" #13 prio=5 os_prio=0 tid=0x00007f3a082ce000 nid=0x4897 waiting for monitor entry [0x00007f39bc1ba000]
+   java.lang.Thread.State: BLOCKED (on object monitor)
+	at edu.technopolis.advancedjava.Deadlock.second(Deadlock.java:34)
+	- waiting to lock <0x000000008c18efa0> (a java.lang.Object)
+	- locked <0x000000008c18efb0> (a java.lang.Object)
+	at edu.technopolis.advancedjava.Deadlock$$Lambda$2/226170135.run(Unknown Source)
+	at java.lang.Thread.run(java.base@9.0.4/Thread.java:844)
+
+"Thread-0" #12 prio=5 os_prio=0 tid=0x00007f3a082cc800 nid=0x4896 waiting for monitor entry [0x00007f39bc2bb000]
+   java.lang.Thread.State: BLOCKED (on object monitor)
+	at edu.technopolis.advancedjava.Deadlock.first(Deadlock.java:23)
+	- waiting to lock <0x000000008c18efb0> (a java.lang.Object)
+	- locked <0x000000008c18efa0> (a java.lang.Object)
+	at edu.technopolis.advancedjava.Deadlock$$Lambda$1/1849433705.run(Unknown Source)
+	at java.lang.Thread.run(java.base@9.0.4/Thread.java:844)
+
+"Service Thread" #11 daemon prio=9 os_prio=0 tid=0x00007f3a082ae800 nid=0x4894 runnable [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Monitor Ctrl-Break" #10 daemon prio=5 os_prio=0 tid=0x00007f3a082ad800 nid=0x4893 runnable [0x00007f39bc5be000]
+   java.lang.Thread.State: RUNNABLE
+	at java.net.SocketInputStream.socketRead0(java.base@9.0.4/Native Method)
+	at java.net.SocketInputStream.socketRead(java.base@9.0.4/SocketInputStream.java:116)
+	at java.net.SocketInputStream.read(java.base@9.0.4/SocketInputStream.java:171)
+	at java.net.SocketInputStream.read(java.base@9.0.4/SocketInputStream.java:141)
+	at sun.nio.cs.StreamDecoder.readBytes(java.base@9.0.4/StreamDecoder.java:284)
+	at sun.nio.cs.StreamDecoder.implRead(java.base@9.0.4/StreamDecoder.java:326)
+	at sun.nio.cs.StreamDecoder.read(java.base@9.0.4/StreamDecoder.java:178)
+	- locked <0x000000008c059960> (a java.io.InputStreamReader)
+	at java.io.InputStreamReader.read(java.base@9.0.4/InputStreamReader.java:185)
+	at java.io.BufferedReader.fill(java.base@9.0.4/BufferedReader.java:161)
+	at java.io.BufferedReader.readLine(java.base@9.0.4/BufferedReader.java:326)
+	- locked <0x000000008c059960> (a java.io.InputStreamReader)
+	at java.io.BufferedReader.readLine(java.base@9.0.4/BufferedReader.java:392)
+	at com.intellij.rt.execution.application.AppMainV2$1.run(AppMainV2.java:64)
+
+"Common-Cleaner" #9 daemon prio=8 os_prio=0 tid=0x00007f3a0819e000 nid=0x4889 in Object.wait() [0x00007f39bc6bf000]
+   java.lang.Thread.State: TIMED_WAITING (on object monitor)
+	at java.lang.Object.wait(java.base@9.0.4/Native Method)
+	- waiting on <0x000000008c33ad10> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.ReferenceQueue.remove(java.base@9.0.4/ReferenceQueue.java:151)
+	- waiting to re-lock in wait() <0x000000008c33ad10> (a java.lang.ref.ReferenceQueue$Lock)
+	at jdk.internal.ref.CleanerImpl.run(java.base@9.0.4/CleanerImpl.java:148)
+	at java.lang.Thread.run(java.base@9.0.4/Thread.java:844)
+	at jdk.internal.misc.InnocuousThread.run(java.base@9.0.4/InnocuousThread.java:122)
+
+"Sweeper thread" #8 daemon prio=9 os_prio=0 tid=0x00007f3a0818f000 nid=0x4888 runnable [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"C1 CompilerThread2" #7 daemon prio=9 os_prio=0 tid=0x00007f3a0818d000 nid=0x4887 waiting on condition [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"C2 CompilerThread1" #6 daemon prio=9 os_prio=0 tid=0x00007f3a0818b000 nid=0x4886 waiting on condition [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"C2 CompilerThread0" #5 daemon prio=9 os_prio=0 tid=0x00007f3a08187800 nid=0x4885 waiting on condition [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+   No compile task
+
+"Signal Dispatcher" #4 daemon prio=9 os_prio=0 tid=0x00007f3a08189000 nid=0x4884 waiting on condition [0x0000000000000000]
+   java.lang.Thread.State: RUNNABLE
+
+"Finalizer" #3 daemon prio=8 os_prio=0 tid=0x00007f3a0816b800 nid=0x4881 in Object.wait() [0x00007f39bd4fb000]
+   java.lang.Thread.State: WAITING (on object monitor)
+	at java.lang.Object.wait(java.base@9.0.4/Native Method)
+	- waiting on <0x000000008c30d078> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.ReferenceQueue.remove(java.base@9.0.4/ReferenceQueue.java:151)
+	- waiting to re-lock in wait() <0x000000008c30d078> (a java.lang.ref.ReferenceQueue$Lock)
+	at java.lang.ref.ReferenceQueue.remove(java.base@9.0.4/ReferenceQueue.java:172)
+	at java.lang.ref.Finalizer$FinalizerThread.run(java.base@9.0.4/Finalizer.java:216)
+
+"Reference Handler" #2 daemon prio=10 os_prio=0 tid=0x00007f3a08163000 nid=0x4880 waiting on condition [0x00007f39bd5fc000]
+   java.lang.Thread.State: RUNNABLE
+	at java.lang.ref.Reference.waitForReferencePendingList(java.base@9.0.4/Native Method)
+	at java.lang.ref.Reference.processPendingReferences(java.base@9.0.4/Reference.java:174)
+	at java.lang.ref.Reference.access$000(java.base@9.0.4/Reference.java:44)
+	at java.lang.ref.Reference$ReferenceHandler.run(java.base@9.0.4/Reference.java:138)
+
+"main" #1 prio=5 os_prio=0 tid=0x00007f3a08014000 nid=0x4872 in Object.wait() [0x00007f3a101af000]
+   java.lang.Thread.State: WAITING (on object monitor)
+	at java.lang.Object.wait(java.base@9.0.4/Native Method)
+	- waiting on <0x000000008c191a58> (a java.lang.Thread)
+	at java.lang.Thread.join(java.base@9.0.4/Thread.java:1353)
+	- waiting to re-lock in wait() <0x000000008c191a58> (a java.lang.Thread)
+	at java.lang.Thread.join(java.base@9.0.4/Thread.java:1427)
+	at edu.technopolis.advancedjava.Deadlock.main(Deadlock.java:13)
+
+"VM Thread" os_prio=0 tid=0x00007f3a08159800 nid=0x487f runnable 
+
+"GC Thread#0" os_prio=0 tid=0x00007f3a0802b800 nid=0x4874 runnable 
+
+"GC Thread#1" os_prio=0 tid=0x00007f3a0802d000 nid=0x4875 runnable 
+
+"GC Thread#2" os_prio=0 tid=0x00007f3a0802f000 nid=0x4876 runnable 
+
+"GC Thread#3" os_prio=0 tid=0x00007f3a08030800 nid=0x4877 runnable 
+
+"G1 Main Marker" os_prio=0 tid=0x00007f3a0805f000 nid=0x487d runnable 
+
+"G1 Marker#0" os_prio=0 tid=0x00007f3a08061000 nid=0x487e runnable 
+
+"G1 Refine#0" os_prio=0 tid=0x00007f3a08038000 nid=0x487b runnable 
+
+"G1 Refine#1" os_prio=0 tid=0x00007f3a08036000 nid=0x487a runnable 
+
+"G1 Refine#2" os_prio=0 tid=0x00007f3a08034800 nid=0x4879 runnable 
+
+"G1 Refine#3" os_prio=0 tid=0x00007f3a08032800 nid=0x4878 runnable 
+
+"G1 Young RemSet Sampling" os_prio=0 tid=0x00007f3a08039800 nid=0x487c runnable 
+
+"VM Periodic Task Thread" os_prio=0 tid=0x00007f3a082b2800 nid=0x4895 waiting on condition 
+
+JNI global references: 132
+
+
+Found one Java-level deadlock:
+=============================
+"Thread-1":
+  waiting to lock monitor 0x00007f397c002e00 (object 0x000000008c18efa0, a java.lang.Object),
+  which is held by "Thread-0"
+"Thread-0":
+  waiting to lock monitor 0x00007f39b0006f00 (object 0x000000008c18efb0, a java.lang.Object),
+  which is held by "Thread-1"
+
+Java stack information for the threads listed above:
+===================================================
+"Thread-1":
+	at edu.technopolis.advancedjava.Deadlock.second(Deadlock.java:34)
+	- waiting to lock <0x000000008c18efa0> (a java.lang.Object)
+	- locked <0x000000008c18efb0> (a java.lang.Object)
+	at edu.technopolis.advancedjava.Deadlock$$Lambda$2/226170135.run(Unknown Source)
+	at java.lang.Thread.run(java.base@9.0.4/Thread.java:844)
+"Thread-0":
+	at edu.technopolis.advancedjava.Deadlock.first(Deadlock.java:23)
+	- waiting to lock <0x000000008c18efb0> (a java.lang.Object)
+	- locked <0x000000008c18efa0> (a java.lang.Object)
+	at edu.technopolis.advancedjava.Deadlock$$Lambda$1/1849433705.run(Unknown Source)
+	at java.lang.Thread.run(java.base@9.0.4/Thread.java:844)
+
+Found 1 deadlock.
+
+Heap
+ garbage-first heap   total 126976K, used 3072K [0x0000000084800000, 0x00000000849003e0, 0x0000000100000000)
+  region size 1024K, 4 young (4096K), 0 survivors (0K)
+ Metaspace       used 6068K, capacity 6144K, committed 6272K, reserved 1056768K
+  class space    used 513K, capacity 532K, committed 640K, reserved 1048576K
+
