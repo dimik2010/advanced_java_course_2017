@@ -5,6 +5,7 @@ build
 *.ipr
 *.iws
 
-
+.idea/
+/out/
 
 
