@@ -18,14 +18,14 @@ public class Deadlock {
     private static void first() {
         synchronized(FIRST_LOCK) {
             barrier.passBarrier();
-            synchronized(SECOND_LOCK) {
-                //unreachable point
+            synchronized (SECOND_LOCK) {
+
             }
         }
     }
 
     private static void second() {
-        
+    
         //reverse order of monitors
         synchronized(SECOND_LOCK) {
             barrier.passBarrier();
