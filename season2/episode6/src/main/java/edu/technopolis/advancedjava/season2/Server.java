@@ -25,7 +25,7 @@ public class Server {
   private List<SocksClient> clients = new ArrayList<>();
 
 
-  public void launch() {
+  public void launch()  {
     try (ServerSocketChannel serverChannel = ServerSocketChannel.open();
          Selector selector = Selector.open()) {
       serverChannel.configureBlocking(false);
@@ -33,7 +33,6 @@ public class Server {
       serverChannel.register(selector, SelectionKey.OP_ACCEPT);
       while (true) {
         selector.select(); //блокирующий вызов
-//        @NotNull
         Set<SelectionKey> keys = selector.selectedKeys();
         if (keys.isEmpty()) {
           continue;
@@ -54,36 +53,13 @@ public class Server {
 
             return read(key, selector);
           }
-//          if (key.isWritable()) {
-//            //Внимание!!!
-//            //Важно, чтобы при обработке не было долгоиграющих (например, блокирующих операций),
-//            //поскольку текущий поток занимается диспетчеризацией каналов и должен быть всегда доступен
-//            return write(map, key);
-//          }
           return true;
         });
         clients.removeIf((SocksClient::isClosed));
       }
-
     } catch (IOException e) {
       logger.error("Unexpected error on processing incoming connection", e);
     }
-  }
-
-  private boolean write(Map<SocketChannel, ByteBuffer> map, SelectionKey key) {
-    SocketChannel channel = (SocketChannel) key.channel();
-    ByteBuffer buffer = map.get(channel);
-    try {
-      while (buffer.hasRemaining()) {
-        channel.write(buffer);
-      }
-      buffer.compact();
-      key.interestOps(SelectionKey.OP_READ);
-    } catch (IOException e) {
-      closeChannel(channel);
-      e.printStackTrace();
-    }
-    return true;
   }
 
   private boolean read(SelectionKey key, Selector selector) {

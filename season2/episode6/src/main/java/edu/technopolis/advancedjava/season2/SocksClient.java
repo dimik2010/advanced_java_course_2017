@@ -57,8 +57,9 @@ public class SocksClient {
       transferBuffer.compact();
     } catch (IOException e) {
       logger.error("FAILED TO TRANSFER DATA " + e);
+      return true;
     }
-    return false;
+    return true;
   }
 
   private void destroyClient() {
@@ -93,15 +94,6 @@ public class SocksClient {
     byte[] str = new byte[buffer.limit()];
     buffer.get(str);
     System.out.println(new String(str));
-//    if (buffer.limit() > 3 && buffer.get(3) == 0x02) {
-//      ByteBuffer out = ByteBuffer.allocate(2);
-//      out.put((byte) 0x05);
-//      out.put((byte) 0x02);
-//      out.compact();
-//      while (out.hasRemaining()) {
-//        client.write(out);
-//      }
-//    } else {
       ByteBuffer out = ByteBuffer.allocate(2);
       out.put((byte) 0x05);
       out.put((byte) 0x00);
@@ -109,7 +101,6 @@ public class SocksClient {
       while (out.hasRemaining()) {
         client.write(out);
       }
-//    }
     timesLeftToFullyAuth--;
     return true;
   }
@@ -142,23 +133,33 @@ public class SocksClient {
       if (destinationSocket.isConnected()) {
         destination = SocketChannel.open(new InetSocketAddress(address, portNumber));
       }
+
+      if (destination != null) {
+        destination.configureBlocking(false);
+        destination.register(selector, SelectionKey.OP_READ);
+        logger.debug(("CLIENT " + client + " REGISTERED DESTINATION CHANNEL " + destination));
+      }
+
     } catch (SocketTimeoutException e) {
       errorCode = 0x04; //host is unavailable
-      logger.error("FAILED TO CONNECT TO " + address.toString());
+      logger.error("FAILED TO CONNECT TO " + address.toString() + " : TIMEOUT " + e);
+    } catch (IllegalArgumentException e) {
+      errorCode = 0x08; //address is not supported
+      logger.error("FAILED TO CONNECT TO " + address.toString() + " : " + e);
+    } catch (IOException e) {
+      errorCode = 0x04;
+      logger.error("FIALIED TO CONNECT TO " + address.toString() + " : " + e);
     }
-    if (destination != null) {
-      destination.configureBlocking(false);
-      destination.register(selector, SelectionKey.OP_READ);
-      logger.debug(("Client " + client + " registered destination channel " + destination));
+    finally {
+      serverResponse = generateServerResponse(serverResponse, errorCode, typeOfAddress, address, portNumber);
+      while (serverResponse.hasRemaining()) {
+        client.write(serverResponse);
+      }
+      if (errorCode == 0x04) {
+        destroyClient();
+      }
+      timesLeftToFullyAuth--;
     }
-    serverResponse = generateServerResponse(serverResponse, errorCode, typeOfAddress, address, portNumber);
-    while (serverResponse.hasRemaining()) {
-      client.write(serverResponse);
-    }
-    if (errorCode == 0x04) {
-      destroyClient();
-    }
-    timesLeftToFullyAuth--;
     return true;
   }
 
